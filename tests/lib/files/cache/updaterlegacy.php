@@ -11,6 +11,13 @@ namespace Test\Files\Cache;
 use \OC\Files\Filesystem as Filesystem;
 use OC\Files\Storage\Temporary;
 
+/**
+ * Class UpdaterLegacy
+ *
+ * @group DB
+ *
+ * @package Test\Files\Cache
+ */
 class UpdaterLegacy extends \Test\TestCase {
 	/**
 	 * @var \OC\Files\Storage\Storage $storage

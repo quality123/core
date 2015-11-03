@@ -8,6 +8,13 @@
 
 namespace Test\BackgroundJob;
 
+/**
+ * Class JobList
+ *
+ * @group DB
+ *
+ * @package Test\BackgroundJob
+ */
 class JobList extends \Test\TestCase {
 	/**
 	 * @var \OC\BackgroundJob\JobList

@@ -13,6 +13,13 @@ use Test\HookHelper;
 use OC\Files\Filesystem;
 use OCP\Lock\ILockingProvider;
 
+/**
+ * Class File
+ *
+ * @group DB
+ *
+ * @package Test\Connector\Sabre
+ */
 class File extends \Test\TestCase {
 
 	/**

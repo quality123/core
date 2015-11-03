@@ -25,6 +25,11 @@
  *
  */
 
+/**
+ * Class Test_OC_Files_App_Rename
+ *
+ * @group DB
+ */
 class Test_OC_Files_App_Rename extends \Test\TestCase {
 	private static $user;
 

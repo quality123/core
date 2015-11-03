@@ -29,6 +29,13 @@ use OCP\Share;
 use OCA\Files_Sharing\Propagation\GroupPropagationManager;
 use OCA\Files_Sharing\Propagation\PropagationManager;
 
+/**
+ * Class GroupPropagationManagerTest
+ *
+ * @group DB
+ *
+ * @package OCA\Files_sharing\Tests
+ */
 class GroupPropagationManagerTest extends TestCase {
 
 	/**
