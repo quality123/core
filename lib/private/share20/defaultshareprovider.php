@@ -74,7 +74,7 @@ class DefaultShareProvider implements IShareProvider {
 	 * @param IShare $share
 	 * @return IShare[]
 	 */
-	private function getChildren(IShare $share) {
+	public function getChildren(IShare $share) {
 		$children = [];
 
 		$qb = $this->dbConn->getQueryBuilder();
@@ -93,49 +93,14 @@ class DefaultShareProvider implements IShareProvider {
 	}
 
 	/**
-	 * Delete all the children of this share
-	 *
-	 * @param IShare $share
-	 */
-	protected function deleteChildren(IShare $share) {
-		foreach($this->getChildren($share) as $child) {
-			$this->delete($child);
-		}
-	}
-
-	/**
 	 * Delete a share
 	 *
 	 * @param Share $share
 	 * @throws BackendError
 	 */
 	public function delete(IShare $share) {
-		$this->deleteChildren($share);
-
 		// Fetch share to make sure it exists
 		$share = $this->getShareById($share->getId());
-
-		$shareType = $share->getShareType();
-		$sharedWith = '';
-		if ($shareType === \OCP\Share::SHARE_TYPE_USER) {
-			$sharedWith = $share->getSharedWith()->getUID();
-		} else if ($shareType === \OCP\Share::SHARE_TYPE_GROUP) {
-			$sharedWith = $share->getSharedWith()->getGID();
-		}
-
-		$hookParams = [
-			'id'         => $share->getId(),
-			'itemType'   => $share->getPath() instanceof \OCP\Files\File ? 'file' : 'folder',
-			'itemSource' => $share->getPath()->getId(),
-			'shareType'  => $shareType,
-			'shareWith'  => $sharedWith,
-			'itemparent' => $share->getParent(),
-			'uidOwner'   => $share->getSharedBy()->getUID(),
-			'fileSource' => $share->getPath()->getId(),
-			'fileTarget' => $share->getTarget()
-		];
-
-		\OC_Hook::emit('OCP\Share', 'pre_unshare', $hookParams);
 
 		$qb = $this->dbConn->getQueryBuilder();
 		$qb->delete('share')
@@ -147,8 +112,6 @@ class DefaultShareProvider implements IShareProvider {
 		} catch (\Exception $e) {
 			throw new BackendError();
 		}
-
-		\OC_Hook::emit('OCP\Share', 'post_unshare', $hookParams);
 	}
 
 	/**
@@ -253,7 +216,7 @@ class DefaultShareProvider implements IShareProvider {
 		$share->setSharedBy($this->userManager->get($data['uid_owner']));
 
 		// TODO: getById can return an array. How to handle this properly??
-		$path = $this->userFolder->getById($data['file_source']);
+		$path = $this->userFolder->getById((int)$data['file_source']);
 		$path = $path[0];
 		$share->setPath($path);
 

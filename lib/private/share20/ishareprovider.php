@@ -71,6 +71,14 @@ interface IShareProvider {
 	public function getShareById($id);
 
 	/**
+	 * Get children
+	 *
+	 * @param int $parent
+	 * @return IShare[]
+	 */
+	public function getChildren(IShare $parent);
+
+	/**
 	 * Get shares for a given path
 	 *
 	 * @param \OCP\Files\Node $path

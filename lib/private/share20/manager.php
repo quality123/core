@@ -97,6 +97,17 @@ class Manager {
 	}
 
 	/**
+	 * Delete all the children of this share
+	 *
+	 * @param IShare $share
+	 */
+	protected function deleteChildren(IShare $share) {
+		foreach($this->defaultProvider->getChildren($share) as $child) {
+			$this->deleteShare($child);
+		}
+	}
+
+	/**
 	 * Delete a share
 	 *
 	 * @param Share $share
@@ -104,11 +115,43 @@ class Manager {
 	 * @throws \OC\Share20\Exception\BackendError
 	 */
 	public function deleteShare(IShare $share) {
-		if ($share->getId() === null) {
-			throw new ShareNotFound();
+		// Just to make sure we have all the info
+		$share = $this->getShareById($share->getId());
+
+		// Get all children and delete them as well
+		$children = $this->deleteChildren($share);
+
+		// Prepare hook
+		$shareType = $share->getShareType();
+		$sharedWith = '';
+		if ($shareType === \OCP\Share::SHARE_TYPE_USER) {
+			$sharedWith = $share->getSharedWith()->getUID();
+		} else if ($shareType === \OCP\Share::SHARE_TYPE_GROUP) {
+			$sharedWith = $share->getSharedWith()->getGID();
+		} else if ($shareType === \OCP\Share::SHARE_TYPE_REMOTE) {
+			$sharedWith = $share->getSharedWith();
 		}
 
+		$hookParams = [
+			'id'         => $share->getId(),
+			'itemType'   => $share->getPath() instanceof \OCP\Files\File ? 'file' : 'folder',
+			'itemSource' => $share->getPath()->getId(),
+			'shareType'  => $shareType,
+			'shareWith'  => $sharedWith,
+			'itemparent' => $share->getParent(),
+			'uidOwner'   => $share->getSharedBy()->getUID(),
+			'fileSource' => $share->getPath()->getId(),
+			'fileTarget' => $share->getTarget()
+		];
+
+		// Emit pre-hook
+		\OC_Hook::emit('OCP\Share', 'pre_unshare', $hookParams);
+
+		// Do the actual delete
 		$this->defaultProvider->delete($share);
+
+		// Emit post hook
+		\OC_Hook::emit('OCP\Share', 'post_unshare', $hookParams);
 	}
 
 	/**
@@ -131,6 +174,10 @@ class Manager {
 	 * @throws ShareNotFound
 	 */
 	public function getShareById($id) {
+		if ($id === null) {
+			throw new ShareNotFound();
+		}
+
 		$share = $this->defaultProvider->getShareById($id);
 
 		if ($share->getSharedWith() !== $this->currentUser &&

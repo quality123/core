@@ -94,20 +94,122 @@ class ManagerTest extends \Test\TestCase {
 		$this->manager->deleteShare($share);
 	}
 
-	public function testDelete() {
-		$share = $this->getMock('\OC\Share20\IShare');
+	public function dataTestDelete() {
+		$user = $this->getMock('\OCP\IUser');
+		$user->method('getUID')->willReturn('sharedWithUser');
 
-		$share
-			->expects($this->once())
-			->method('getId')
-			->with()
-			->willReturn(42);
+		$group = $this->getMock('\OCP\IGroup');
+		$group->method('getGID')->willReturn('sharedWithGroup');
+	
+		return [
+			[\OCP\Share::SHARE_TYPE_USER, $user, 'sharedWithUser'],
+			[\OCP\Share::SHARE_TYPE_GROUP, $group, 'sharedWithGroup'],
+			[\OCP\Share::SHARE_TYPE_LINK, '', ''],
+			[\OCP\Share::SHARE_TYPE_REMOTE, 'foo@bar.com', 'foo@bar.com'],
+		];
+	}
+
+	/**
+	 * @dataProvider dataTestDelete
+	 */
+	public function testDeleteUser($shareType, $sharedWith, $sharedWith_string) {
+		$manager = $this->getMockBuilder('\OC\Share20\Manager')
+			->setConstructorArgs([
+				$this->user,
+				$this->userManager,
+				$this->groupManager,
+				$this->logger,
+				$this->appConfig,
+				$this->userFolder,
+				$this->defaultProvider
+			])
+			->setMethods(['getShareById', 'deleteChildren'])
+			->getMock();
+
+		$sharedBy = $this->getMock('\OCP\IUser');
+		$sharedBy->method('getUID')->willReturn('sharedBy');
+
+		$path = $this->getMock('\OCP\Files\File');
+		$path->method('getId')->willReturn(1);
+
+		$share = $this->getMock('\OC\Share20\IShare');
+		$share->method('getId')->willReturn(42);
+		$share->method('getShareType')->willReturn($shareType);
+		$share->method('getSharedWith')->willReturn($sharedWith);
+		$share->method('getSharedBy')->willReturn($sharedBy);
+		$share->method('getPath')->willReturn($path);
+		$share->method('getTarget')->willReturn('myTarget');
+
+		$manager->expects($this->once())->method('getShareById')->with(42)->willReturn($share);
+		$manager->expects($this->once())->method('deleteChildren')->with($share);
+
 		$this->defaultProvider
 			->expects($this->once())
 			->method('delete')
 			->with($share);
 
-		$this->manager->deleteShare($share);
+		$hookListner = $this->getMockBuilder('Dummy')->setMethods(['listen'])->getMock();
+		\OCP\Util::connectHook('OCP\Share', 'pre_unshare', $hookListner, 'listen');
+		\OCP\Util::connectHook('OCP\Share', 'post_unshare', $hookListner, 'listen');
+
+		$hookListnerExpects = [
+			'id' => 42,
+			'itemType' => 'file',
+			'itemSource' => 1,
+			'shareType' => $shareType,
+			'shareWith' => $sharedWith_string,
+			'itemparent' => null,
+			'uidOwner' => 'sharedBy',
+			'fileSource' => 1,
+			'fileTarget' => 'myTarget',
+		];
+
+		$hookListner
+			->expects($this->exactly(2))
+			->method('listen')
+			->with($hookListnerExpects);
+
+		$manager->deleteShare($share);
+	}
+
+	public function testDeleteChildren() {
+		$manager = $this->getMockBuilder('\OC\Share20\Manager')
+			->setConstructorArgs([
+				$this->user,
+				$this->userManager,
+				$this->groupManager,
+				$this->logger,
+				$this->appConfig,
+				$this->userFolder,
+				$this->defaultProvider
+			])
+			->setMethods(['deleteShare'])
+			->getMock();
+
+		$share = $this->getMock('\OC\Share20\IShare');
+
+		$child1 = $this->getMock('\OC\Share20\IShare');
+		$child2 = $this->getMock('\OC\Share20\IShare');
+		$child3 = $this->getMock('\OC\Share20\IShare');
+
+		$shares = [
+			$child1,
+			$child2,
+			$child3,
+		];
+
+		$this->defaultProvider
+			->expects($this->once())
+			->method('getChildren')
+			->with($share)
+			->willReturn($shares);
+
+		$manager
+			->expects($this->exactly(3))
+			->method('deleteShare')
+			->withConsecutive($child1, $child2, $child3);
+
+		$this->invokePrivate($manager, 'deleteChildren', [$share]);
 	}
 
 	/**
