@@ -20,7 +20,7 @@
  */
 
 return [
-    'routes' => [
+	'routes' =>	[
 		[
 			'name' => 'Settings#addServer',
 			'url' => '/trusted-servers',
@@ -31,5 +31,15 @@ return [
 			'url' => '/trusted-servers/{id}',
 			'verb' => 'DELETE'
 		],
-    ]
+		[
+			'name' => 'Auth#getSharedSecret',
+			'url' => '/get-shared-secret',
+			'verb' => 'GET'
+		],
+		[
+			'name' => 'Auth#requestSharedSecret',
+			'url' => '/request-shared-secret',
+			'verb' => 'POST'
+		],
+	]
 ];

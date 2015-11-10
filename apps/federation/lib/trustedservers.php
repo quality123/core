@@ -22,12 +22,11 @@
 
 namespace OCA\Federation;
 
-
-use OC\Files\Filesystem;
 use OCP\AppFramework\Http;
+use OCP\BackgroundJob\IJobList;
 use OCP\Http\Client\IClientService;
-use OCP\IDBConnection;
 use OCP\ILogger;
+use OCP\Security\ISecureRandom;
 
 class TrustedServers {
 
@@ -40,21 +39,31 @@ class TrustedServers {
 	/** @var ILogger */
 	private $logger;
 
-	private $dbTable = 'trusted_servers';
+	/** @var IJobList */
+	private $jobList;
+
+	/** @var ISecureRandom */
+	private $secureRandom;
 
 	/**
 	 * @param DbHandler $dbHandler
 	 * @param IClientService $httpClientService
 	 * @param ILogger $logger
+	 * @param IJobList $jobList
+	 * @param ISecureRandom $secureRandom
 	 */
 	public function __construct(
 		DbHandler $dbHandler,
 		IClientService $httpClientService,
-		ILogger $logger
+		ILogger $logger,
+		IJobList $jobList,
+		ISecureRandom $secureRandom
 	) {
 		$this->dbHandler = $dbHandler;
 		$this->httpClientService = $httpClientService;
 		$this->logger = $logger;
+		$this->jobList = $jobList;
+		$this->secureRandom = $secureRandom;
 	}
 
 	/**
@@ -64,7 +73,21 @@ class TrustedServers {
 	 * @return int server id
 	 */
 	public function addServer($url) {
-		return $this->dbHandler->add($this->normalizeUrl($url));
+		$url = $this->updateProtocol($url);
+		$result = $this->dbHandler->addServer($url);
+		if ($result) {
+			$token = $this->secureRandom->getMediumStrengthGenerator()->generate(16);
+			$this->dbHandler->addToken($url, $token);
+			$this->jobList->add(
+				'OCA\Federation\BackgroundJob\RequestSharedSecret',
+				[
+					'url' => $url,
+					'token' => $token
+				]
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -73,7 +96,7 @@ class TrustedServers {
 	 * @param int $id
 	 */
 	public function removeServer($id) {
-		$this->dbHandler->remove($id);
+		$this->dbHandler->removeServer($id);
 	}
 
 	/**
@@ -82,7 +105,7 @@ class TrustedServers {
 	 * @return array
 	 */
 	public function getServers() {
-		return $this->dbHandler->getAll();
+		return $this->dbHandler->getAllServer();
 	}
 
 	/**
@@ -92,7 +115,7 @@ class TrustedServers {
 	 * @return bool
 	 */
 	public function isTrustedServer($url) {
-		return $this->dbHandler->exists($this->normalizeUrl($url));
+		return $this->dbHandler->serverExists($url);
 	}
 
 	/**
@@ -137,24 +160,21 @@ class TrustedServers {
 	}
 
 	/**
-	 * normalize URL
+	 * check if the URL contain a protocol, if not add https
 	 *
 	 * @param string $url
 	 * @return string
 	 */
-	protected function normalizeUrl($url) {
+	protected function updateProtocol($url) {
+		if (
+			strpos($url, 'https://') === 0
+			|| strpos($url, 'http://') === 0
+		) {
 
-		$normalized = $url;
+			return $url;
 
-		if (strpos($url, 'https://') === 0) {
-			$normalized = substr($url, strlen('https://'));
-		} else if (strpos($url, 'http://') === 0) {
-			$normalized = substr($url, strlen('http://'));
 		}
 
-		$normalized = Filesystem::normalizePath($normalized);
-		$normalized = trim($normalized, '/');
-
-		return $normalized;
+		return 'https://' . $url;
 	}
 }

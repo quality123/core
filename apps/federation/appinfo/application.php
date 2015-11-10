@@ -21,6 +21,7 @@
 
 namespace OCA\Federation\AppInfo;
 
+use OCA\Federation\Controller\AuthController;
 use OCA\Federation\Controller\SettingsController;
 use OCA\Federation\DbHandler;
 use OCA\Federation\Middleware\AddServerMiddleware;
@@ -70,7 +71,9 @@ class Application extends \OCP\AppFramework\App {
 			return new TrustedServers(
 				$c->query('DbHandler'),
 				\OC::$server->getHTTPClientService(),
-				\OC::$server->getLogger()
+				\OC::$server->getLogger(),
+				\OC::$server->getJobList(),
+				\OC::$server->getSecureRandom()
 			);
 		});
 
@@ -81,6 +84,19 @@ class Application extends \OCP\AppFramework\App {
 				$server->getRequest(),
 				$server->getL10N($c->getAppName()),
 				$c->query('TrustedServers')
+			);
+		});
+
+
+		$container->registerService('AuthController', function (IAppContainer $c) {
+			$server = $c->getServer();
+			return new AuthController(
+				$c->getAppName(),
+				$server->getRequest(),
+				$server->getSecureRandom(),
+				$server->getJobList(),
+				$c->query('TrustedServers'),
+				$c->query('DbHandler')
 			);
 		});
 	}
