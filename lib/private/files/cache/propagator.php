@@ -21,6 +21,9 @@
 
 namespace OC\Files\Cache;
 
+/**
+ * Propagate etags and mtimes within the storage
+ */
 class Propagator {
 	/**
 	 * @var \OC\Files\Storage\Storage

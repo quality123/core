@@ -1160,6 +1160,11 @@ class View {
 	}
 
 	/**
+	 * Get file info from cache
+	 *
+	 * If the file is not in cached it will be scanned
+	 * If the file has changed on storage the cache will be updated
+	 *
 	 * @param \OC\Files\Storage\Storage $storage
 	 * @param string $internalPath
 	 * @param string $relativePath
