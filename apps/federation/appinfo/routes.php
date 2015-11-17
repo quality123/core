@@ -19,27 +19,24 @@
  *
  */
 
-return [
-	'routes' =>	[
-		[
-			'name' => 'Settings#addServer',
-			'url' => '/trusted-servers',
-			'verb' => 'POST'
-		],
-		[
-			'name' => 'Settings#removeServer',
-			'url' => '/trusted-servers/{id}',
-			'verb' => 'DELETE'
-		],
-		[
-			'name' => 'Auth#getSharedSecret',
-			'url' => '/get-shared-secret',
-			'verb' => 'GET'
-		],
-		[
-			'name' => 'Auth#requestSharedSecret',
-			'url' => '/request-shared-secret',
-			'verb' => 'POST'
-		],
+$application = new \OCA\Federation\AppInfo\Application();
+
+$application->registerRoutes(
+	$this,
+	[
+		'routes' => [
+			[
+				'name' => 'Settings#addServer',
+				'url' => '/trusted-servers',
+				'verb' => 'POST'
+			],
+			[
+				'name' => 'Settings#removeServer',
+				'url' => '/trusted-servers/{id}',
+				'verb' => 'DELETE'
+			],
+		]
 	]
-];
+);
+
+$application->registerOCSApi();

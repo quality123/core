@@ -21,14 +21,15 @@
 
 namespace OCA\Federation\AppInfo;
 
+use OCA\Federation\API\OCSAuthAPI;
 use OCA\Federation\Controller\AuthController;
 use OCA\Federation\Controller\SettingsController;
 use OCA\Federation\DbHandler;
 use OCA\Federation\Middleware\AddServerMiddleware;
 use OCA\Federation\TrustedServers;
+use OCP\API;
 use OCP\App;
 use OCP\AppFramework\IAppContainer;
-use OCP\IAppConfig;
 
 class Application extends \OCP\AppFramework\App {
 
@@ -39,7 +40,6 @@ class Application extends \OCP\AppFramework\App {
 		parent::__construct('federation', $urlParams);
 		$this->registerService();
 		$this->registerMiddleware();
-
 	}
 
 	/**
@@ -105,4 +105,38 @@ class Application extends \OCP\AppFramework\App {
 		$container = $this->getContainer();
 		$container->registerMiddleware('addServerMiddleware');
 	}
+
+	/**
+	 * register OCS API Calls
+	 */
+	public function registerOCSApi() {
+
+		$container = $this->getContainer();
+		$server = $container->getServer();
+
+		$auth = new OCSAuthAPI(
+			$server->getRequest(),
+			$server->getSecureRandom(),
+			$server->getJobList(),
+			$container->query('TrustedServers'),
+			$container->query('DbHandler')
+
+		);
+
+		API::register('get',
+			'/apps/federation/api/v1/shared-secret',
+			array($auth, 'getSharedSecret'),
+			'federation',
+			API::GUEST_AUTH
+		);
+
+		API::register('post',
+			'/apps/federation/api/v1/request-shared-secret',
+			array($auth, 'requestSharedSecret'),
+			'federation',
+			API::GUEST_AUTH
+		);
+
+	}
+
 }

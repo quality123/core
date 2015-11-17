@@ -91,6 +91,26 @@ class TrustedServers {
 	}
 
 	/**
+	 * get shared secret for the given server
+	 *
+	 * @param string $url
+	 * @return string
+	 */
+	public function getSharedSecret($url) {
+		return $this->dbHandler->getSharedSecret($url);
+	}
+
+	/**
+	 * add shared secret for the given server
+	 *
+	 * @param string $url
+	 * @param $sharedSecret
+	 */
+	public function addSharedSecret($url, $sharedSecret) {
+		$this->dbHandler->addSharedSecret($url, $sharedSecret);
+	}
+
+	/**
 	 * remove server from the list of trusted ownCloud servers
 	 *
 	 * @param int $id

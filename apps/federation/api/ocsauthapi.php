@@ -20,20 +20,27 @@
  */
 
 
-namespace OCA\Federation\Controller;
-
+namespace OCA\Federation\API;
 
 use OC\BackgroundJob\JobList;
 use OCA\Federation\DbHandler;
 use OCA\Federation\TrustedServers;
-use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 use OCP\Security\ISecureRandom;
 use OCP\Security\StringUtils;
 
-class AuthController extends Controller {
+/**
+ * Class OCSAuthAPI
+ *
+ * OCS API end-points to exchange shared secret between two connected ownClouds
+ *
+ * @package OCA\Federation\API
+ */
+class OCSAuthAPI {
+
+	/** @var IRequest */
+	private $request;
 
 	/** @var ISecureRandom  */
 	private $secureRandom;
@@ -50,7 +57,6 @@ class AuthController extends Controller {
 	/**
 	 * AuthController constructor.
 	 *
-	 * @param string $appName
 	 * @param IRequest $request
 	 * @param ISecureRandom $secureRandom
 	 * @param JobList $jobList
@@ -58,14 +64,13 @@ class AuthController extends Controller {
 	 * @param DbHandler $dbHandler
 	 */
 	public function __construct(
-		$appName,
 		IRequest $request,
 		ISecureRandom $secureRandom,
 		JobList $jobList,
 		TrustedServers $trustedServers,
 		DbHandler $dbHandler
 	) {
-		parent::__construct($appName, $request);
+		$this->request = $request;
 		$this->secureRandom = $secureRandom;
 		$this->jobList = $jobList;
 		$this->trustedServers = $trustedServers;
@@ -75,59 +80,51 @@ class AuthController extends Controller {
 	/**
 	 * request received to ask remote server for a shared secret
 	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 *
-	 * @param string $url
-	 * @param string $token
-	 * @return Http\DataResponse
+	 * @return \OC_OCS_Result
 	 */
-	public function requestSharedSecret($url, $token) {
+	public function requestSharedSecret() {
+
+		$url = $this->request->getParam('url');
+		$token = $this->request->getParam('token');
+
 		if ($this->trustedServers->isTrustedServer($url) === false) {
-			return new Http\DataResponse([], Http::STATUS_FORBIDDEN);
+			return new \OC_OCS_Result(null, HTTP::STATUS_FORBIDDEN);
 		}
 
 		$this->jobList->add(
-			'\OCA\Federation\BackgroundJob\GetSharedSecret',
+			'OCA\Federation\BackgroundJob\GetSharedSecret',
 			[
 				'url' => $url,
 				'token' => $token,
 			]
 		);
 
-		return new Http\DataResponse();
+		return new \OC_OCS_Result();
 
 	}
 
 	/**
 	 * create shared secret and return it
 	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 *
-	 * @param string $url
-	 * @param string $token
-	 * @return Http\DataResponse
+	 * @return \OC_OCS_Result
 	 */
-	public function getSharedSecret($url, $token) {
+	public function getSharedSecret() {
+
+		$url = $this->request->getParam('url');
+		$token = $this->request->getParam('token');
+
 		if (
 			$this->trustedServers->isTrustedServer($url) === false
 			|| $this->isValidToken($url, $token) === false
 		) {
-			return new Http\DataResponse([], Http::STATUS_FORBIDDEN);
+			return new \OC_OCS_Result(null, HTTP::STATUS_FORBIDDEN);
 		}
 
 		$sharedSecret = $this->secureRandom->getMediumStrengthGenerator()->generate(32);
 
 		$this->dbHandler->addSharedSecret($url, $sharedSecret);
 
-		return new Http\DataResponse(
-			[
-				'sharedSecret' => $sharedSecret
-			]
-		);
+		return new \OC_OCS_Result(['sharedSecret' => $sharedSecret]);
 
 	}
 

@@ -50,7 +50,7 @@ class RequestSharedSecret extends QueuedJob {
 	/** @var IURLGenerator */
 	private $urlGenerator;
 
-	private $endPoint = '/index.php/apps/federation/request-shared-secret';
+	private $endPoint = '/ocs/v2.php/apps/federation/api/v1/request-shared-secret?format=json';
 
 	/**
 	 * RequestSharedSecret constructor.

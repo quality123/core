@@ -24,6 +24,7 @@ namespace OCA\Federation\BackgroundJob;
 
 use OC\BackgroundJob\QueuedJob;
 use OCA\Federation\DbHandler;
+use OCA\Federation\TrustedServers;
 use OCP\AppFramework\Http;
 use OCP\BackgroundJob\IJobList;
 use OCP\Http\Client\IClient;
@@ -48,10 +49,10 @@ class GetSharedSecret extends QueuedJob{
 	/** @var IURLGenerator */
 	private $urlGenerator;
 
-	/** @var DbHandler */
-	private $dbHandler;
+	/** @var TrustedServers  */
+	private $trustedServers;
 
-	private $endPoint = '/index.php/apps/federation/get-shared-secret';
+	private $endPoint = '/ocs/v2.php/apps/federation/api/v1/shared-secret?format=json';
 
 	/**
 	 * RequestSharedSecret constructor.
@@ -59,18 +60,28 @@ class GetSharedSecret extends QueuedJob{
 	 * @param IClient $httpClient
 	 * @param IURLGenerator $urlGenerator
 	 * @param IJobList $jobList
-	 * @param DbHandler $dbHandler
+	 * @param TrustedServers $trustedServers
 	 */
 	public function __construct(
 		IClient $httpClient = null,
 		IURLGenerator $urlGenerator = null,
 		IJobList $jobList = null,
-		DbHandler $dbHandler = null
+		TrustedServers $trustedServers = null
 	) {
 		$this->httpClient = $httpClient ? $httpClient : \OC::$server->getHTTPClientService()->newClient();
 		$this->jobList = $jobList ? $jobList : \OC::$server->getJobList();
 		$this->urlGenerator = $urlGenerator ? $urlGenerator : \OC::$server->getURLGenerator();
-		$this->dbHandler = $dbHandler ? $dbHandler : new DbHandler(\OC::$server->getDatabaseConnection(), \OC::$server->getL10N('federation'));
+		if ($trustedServers) {
+			$this->trustedServers = $trustedServers;
+		} else {
+			$this->trustedServers = new TrustedServers(
+					new DbHandler(\OC::$server->getDatabaseConnection(), \OC::$server->getL10N('federation')),
+					\OC::$server->getHTTPClientService(),
+					\OC::$server->getLogger(),
+					$this->jobList,
+					\OC::$server->getSecureRandom()
+			);
+		}
 	}
 
 	/**
@@ -121,8 +132,7 @@ class GetSharedSecret extends QueuedJob{
 		} else {
 			$body = $result->getBody();
 			$result = json_decode($body, true);
-			$this->dbHandler->addSharedSecret($target, $result['sharedSecret']);
-
+			$this->trustedServers->addSharedSecret($target, $result['ocs']['data']['sharedSecret']);
 		}
 	}
 }
