@@ -21,14 +21,14 @@ interface IComment {
 	 *
 	 * @return string
 	 */
-	public function id();
+	public function getId();
 
 	/**
 	 * returns the parent ID of the comment
 	 *
 	 * @return string
 	 */
-	public function parentId();
+	public function getParentId();
 
 	/**
 	 * sets the parent ID and returns itself
@@ -43,14 +43,14 @@ interface IComment {
 	 *
 	 * @return int
 	 */
-	public function childrenCount();
+	public function getChildrenCount();
 
 	/**
 	 * returns the message of the comment
 	 *
 	 * @return string
 	 */
-	public function message();
+	public function getMessage();
 
 	/**
 	 * sets the message of the comment and returns itself
@@ -65,7 +65,7 @@ interface IComment {
 	 *
 	 * @return string
 	 */
-	public function verb();
+	public function getVerb();
 
 	/**
 	 * sets the verb of the comment, e.g. 'comment' or 'like'
@@ -80,14 +80,14 @@ interface IComment {
 	 *
 	 * @return string
 	 */
-	public function actorType();
+	public function getActorType();
 
 	/**
 	 * returns the actor ID
 	 *
 	 * @return string
 	 */
-	public function actorId();
+	public function getActorId();
 
 	/**
 	 * sets (overwrites) the actor type and id
@@ -103,7 +103,7 @@ interface IComment {
 	 *
 	 * @return int
 	 */
-	public function timestamp();
+	public function getTimestamp();
 
 	/**
 	 * sets the timestamp of the comment and returns itself
@@ -118,21 +118,21 @@ interface IComment {
 	 *
 	 * @return int
 	 */
-	public function latestChildTimestamp();
+	public function getLatestChildTimestamp();
 
 	/**
 	 * returns the object type the comment is attached to
 	 *
 	 * @return string
 	 */
-	public function objectType();
+	public function getObjectType();
 
 	/**
 	 * returns the object id the comment is attached to
 	 *
 	 * @return string
 	 */
-	public function objectId();
+	public function getObjectId();
 
 	/**
 	 * sets (overwrites) the object of the comment
