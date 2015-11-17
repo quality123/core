@@ -20,6 +20,7 @@ interface IComment {
 	 * by itself (e.g. after saving).
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getId();
 
@@ -27,6 +28,7 @@ interface IComment {
 	 * returns the parent ID of the comment
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getParentId();
 
@@ -35,6 +37,7 @@ interface IComment {
 	 *
 	 * @param string $parentId
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function setParentId($parentId);
 
@@ -42,6 +45,7 @@ interface IComment {
 	 * returns the number of children
 	 *
 	 * @return int
+	 * @since 9.0.0
 	 */
 	public function getChildrenCount();
 
@@ -49,6 +53,7 @@ interface IComment {
 	 * returns the message of the comment
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getMessage();
 
@@ -57,6 +62,7 @@ interface IComment {
 	 *
 	 * @param $message
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function setMessage($message);
 
@@ -64,6 +70,7 @@ interface IComment {
 	 * returns the verb of the comment
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getVerb();
 
@@ -72,6 +79,7 @@ interface IComment {
 	 *
 	 * @param $verb
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function setVerb($verb);
 
@@ -79,6 +87,7 @@ interface IComment {
 	 * returns the actor type
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getActorType();
 
@@ -86,6 +95,7 @@ interface IComment {
 	 * returns the actor ID
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getActorId();
 
@@ -95,6 +105,7 @@ interface IComment {
 	 * @param string $actorType e.g. 'user'
 	 * @param string $actorId e.g. 'zombie234'
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function setActor($actorType, $actorId);
 
@@ -102,6 +113,7 @@ interface IComment {
 	 * returns the unix timestamp of the comment
 	 *
 	 * @return int
+	 * @since 9.0.0
 	 */
 	public function getTimestamp();
 
@@ -110,6 +122,7 @@ interface IComment {
 	 *
 	 * @param int $timestamp
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function setTimestamp($timestamp);
 
@@ -117,6 +130,7 @@ interface IComment {
 	 * returns the timestamp of the most recent child
 	 *
 	 * @return int
+	 * @since 9.0.0
 	 */
 	public function getLatestChildTimestamp();
 
@@ -124,6 +138,7 @@ interface IComment {
 	 * returns the object type the comment is attached to
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getObjectType();
 
@@ -131,6 +146,7 @@ interface IComment {
 	 * returns the object id the comment is attached to
 	 *
 	 * @return string
+	 * @since 9.0.0
 	 */
 	public function getObjectId();
 
@@ -140,6 +156,7 @@ interface IComment {
 	 * @param string $objectType e.g. 'file'
 	 * @param string $objectId e.g. '16435'
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function setObject($objectType, $objectId);
 
@@ -147,6 +164,7 @@ interface IComment {
 	 * saves the comment permanently and returns itself
 	 *
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function save();
 
@@ -154,6 +172,7 @@ interface IComment {
 	 * permanently deletes the comment and returns itself
 	 *
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function delete();
 
@@ -161,6 +180,7 @@ interface IComment {
 	 * loads its data from its storage and returns itself
 	 *
 	 * @return IComment
+	 * @since 9.0.0
 	 */
 	public function load();
 
