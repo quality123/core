@@ -81,7 +81,8 @@ class DefaultShareProvider implements IShareProvider {
 		$qb->select('*')
 			->from('share')
 			->where($qb->expr()->eq('parent', $qb->createParameter('parent')))
-			->setParameter(':parent', $share->getId());
+			->setParameter(':parent', $share->getId())
+			->orderBy('id');
 
 		$cursor = $qb->execute();
 		while($data = $cursor->fetch()) {
