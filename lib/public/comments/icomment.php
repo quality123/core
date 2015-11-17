@@ -75,14 +75,6 @@ interface IComment {
 	public function actorType();
 
 	/**
-	 * sets (overwrites) the actor type
-	 *
-	 * @param string $actorType
-	 * @return IComment
-	 */
-	public function setActorType($actorType);
-
-	/**
 	 * returns the actor ID
 	 *
 	 * @return string
@@ -90,12 +82,13 @@ interface IComment {
 	public function actorId();
 
 	/**
-	 * sets (overwrites) the actor id
+	 * sets (overwrites) the actor type and id
 	 *
-	 * @param string $actorId
+	 * @param string $actorType e.g. 'user'
+	 * @param string $actorId e.g. 'zombie234'
 	 * @return IComment
 	 */
-	public function setActorId($actorId);
+	public function setActor($actorType, $actorId);
 
 	/**
 	 * returns the unix timestamp of the comment
@@ -127,14 +120,6 @@ interface IComment {
 	public function objectType();
 
 	/**
-	 * sets (overwrites) the object typed of the comment
-	 *
-	 * @param string $objectType
-	 * @return IComment
-	 */
-	public function setObjectType($objectType);
-
-	/**
 	 * returns the object id the comment is attached to
 	 *
 	 * @return string
@@ -142,12 +127,13 @@ interface IComment {
 	public function objectId();
 
 	/**
-	 * sets (overwrites) the objectId of the comment
+	 * sets (overwrites) the object of the comment
 	 *
-	 * @param string $objectId
+	 * @param string $objectType e.g. 'file'
+	 * @param string $objectId e.g. '16435'
 	 * @return IComment
 	 */
-	public function setObjectId($objectId);
+	public function setObject($objectType, $objectId);
 
 	/**
 	 * saves the comment permanently and returns itself
