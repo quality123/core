@@ -3,7 +3,9 @@
 namespace OCP\Comments;
 
 /**
- * Interface CommentsManager
+ * Interface ICommentsManager
+ *
+ * This class manages the access to comments
  *
  * @package OCP\Comments
  * @since 9.0.0

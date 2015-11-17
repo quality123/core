@@ -2,6 +2,14 @@
 
 namespace OCP\Comments;
 
+/**
+ * Interface IComment
+ *
+ * This class represents a comment and offers methods for modification.
+ *
+ * @package OCP\Comments
+ * @since 9.0.0
+ */
 interface IComment {
 
 	/**
